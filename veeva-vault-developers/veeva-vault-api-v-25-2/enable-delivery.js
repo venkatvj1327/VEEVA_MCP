@@ -1,0 +1,73 @@
+/**
+ * Function to enable delivery of messages in a specified queue in Veeva Vault.
+ *
+ * @param {Object} args - Arguments for enabling delivery.
+ * @param {string} args.queue_name - The name of the specific queue.
+ * @returns {Promise<Object>} - The result of the enable delivery operation.
+ */
+const executeFunction = async ({ queue_name }) => {
+  const vaultDNS = ''; // will be provided by the user
+  const version = '25.2'; // API version
+  const sessionId = ''; // will be provided by the user
+  const clientId = ''; // will be provided by the user
+
+  try {
+    // Construct the URL for the request
+    const url = `https://${vaultDNS}/api/${version}/services/queues/${queue_name}/actions/enable_delivery`;
+
+    // Set up headers for the request
+    const headers = {
+      'Authorization': sessionId,
+      'Accept': 'application/json',
+      'X-VaultAPI-ClientID': clientId
+    };
+
+    // Perform the fetch request
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers
+    });
+
+    // Check if the response was successful
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(JSON.stringify(errorData));
+    }
+
+    // Parse and return the response data
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error enabling delivery:', error);
+    return {
+      error: `An error occurred while enabling delivery: ${error instanceof Error ? error.message : JSON.stringify(error)}`
+    };
+  }
+};
+
+/**
+ * Tool configuration for enabling delivery of messages in a queue in Veeva Vault.
+ * @type {Object}
+ */
+const apiTool = {
+  function: executeFunction,
+  definition: {
+    type: 'function',
+    function: {
+      name: 'enable_delivery',
+      description: 'Enable delivery of messages in a specified queue in Veeva Vault.',
+      parameters: {
+        type: 'object',
+        properties: {
+          queue_name: {
+            type: 'string',
+            description: 'The name of the specific queue.'
+          }
+        },
+        required: ['queue_name']
+      }
+    }
+  }
+};
+
+export { apiTool };
